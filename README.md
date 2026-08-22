@@ -1,26 +1,20 @@
 # Turing Complete Toolbox
 
-A tiny local web app with helpers for playing [Turing Complete](https://turingcomplete.game/).
-All the logic lives in Go; the page is a thin client that posts each keystroke to the backend.
+A small web toolbox with helpers for playing [Turing Complete](https://turingcomplete.game/).
 
-## Install
+Everything runs in the browser: there is no backend, no build step and nothing to
+install. The site is the `docs/` folder exactly as it sits in the repository.
 
-```sh
-go install .        # -> $GOPATH/bin/turing_complete_toolbox (already on PATH)
-```
-
-The web assets are embedded, so the installed binary is self contained and can be
-run from anywhere.
-
-## Run
+## Run it
 
 ```sh
-turing_complete_toolbox             # serves on :8080 and opens a browser tab
-turing_complete_toolbox -addr :9000
-turing_complete_toolbox -open=false # no browser tab
-
-go run .                            # from the source tree, without installing
+npm run serve        # http://localhost:8080
 ```
+
+Any static server will do — `npx serve docs`, or whatever you already have. You
+do need one: the page is made of ES modules, and browsers refuse to load those
+over `file://`, so opening `index.html` by double clicking it will show a blank
+page.
 
 ## Tools
 
@@ -47,16 +41,9 @@ spelled out over a full 32 bit word.
 
 | Tool | What it does |
 | --- | --- |
-| Symphony Word | The word layout, what each field means, the IMM variant, and the four modes. |
-| Symphony IO | Mode 0 opcodes, and how the keyboard's two pins are merged. |
-| Symphony ALU | Mode 1 opcodes and the flags CMP writes. |
-| Symphony JUMP | Mode 2 conditions and the mask rule behind them. |
-| Symphony RAM | Mode 3 opcodes, program memory and persistent storage. |
+| Instruction Doc | The word layout and every opcode, one fold per mode: IO, ALU, JUMP and RAM. |
 | Instruction Encoder | One colour coded box per instruction field, all on a single line, and the integer to feed the machine underneath. |
 | Instruction Decoder | The way back: a word, or a pattern with letters standing for variables, read out field by field. |
-
-The reference is split one card per mode so only what you are building stays
-open; the folding is remembered per card.
 
 The instruction word is `XMMIOOOO DDDDAAAA XXXXBBBB XXXXXXXX` — mode, immediate
 flag, opcode, destination register, argument A, argument B, and unused bits.
@@ -79,38 +66,75 @@ Fields made only of bits are decoded; fields holding a letter are reported as
 that variable, and the spelled out instruction uses the letter in place of the
 value.
 
-Everything is documented except ALU opcodes 11-15. To document more, add to the
-cards in [internal/tools/symphony_doc.go](internal/tools/symphony_doc.go) and to
-`describeSymphony` in
-[internal/tools/symphony_instruction.go](internal/tools/symphony_instruction.go)
-— a test fails if a documented opcode has no decoding.
+Everything is documented except ALU opcodes 11-15.
+
+## How it is put together
+
+```
+docs/
+  index.html      the page, and the import map naming the vendored modules
+  registry.js     what every tool looks like: its inputs, and its doc sections
+  tools/          what every tool computes
+  components/     how it is drawn, in Preact
+  lib/            preact, preact/hooks and htm, vendored
+test/             node --test, no dependencies
+```
+
+`registry.js` is data: the inputs a tool shows, the colours its fields wear and
+the reference sections it prints. `tools/index.js` maps a tool id to the
+function that answers it. A tool with no entry there is pure documentation.
+
+The UI is [Preact](https://preactjs.com/) with
+[htm](https://github.com/developit/htm), so the templates are tagged template
+literals and there is nothing to transpile — the vendored modules are loaded by
+name through the import map in `index.html`.
+
+One part is deliberately not declarative. `components/segments-dom.js` builds
+the segmented word with plain DOM, because every keystroke in it is about the
+caret — where it sits, which box it moves to next, where it lands again after
+the immediate flag changes the row's shape — and a caret is not state worth
+handing to a renderer. It owns its subtree and reports values back up.
 
 ## Adding a tool
 
-Drop a new file in `internal/tools/` and register it from `init()`:
+Add a descriptor to `docs/registry.js`:
 
-```go
-func init() {
-    Register(&Tool{
-        ID:          "my-tool",
-        Name:        "My Tool",
-        Family:      FamilyGeneral,
-        Description: "What it does.",
-        Inputs:      []Input{{ID: "bits", Placeholder: "1010", Format: "bits"}},
-        Run: func(in map[string]string) ([]Field, error) {
-            return []Field{{Label: "Result", Value: in["bits"]}}, nil
-        },
-    })
+```js
+{
+  id: "my-tool",
+  name: "My Tool",
+  family: "General",
+  description: "What it does.",
+  inputs: [{ id: "bits", placeholder: "1010", format: "bits" }],
 }
 ```
 
-It shows up automatically as a card in the UI — nothing to change in the
-frontend. Give `Inputs` several entries with a `Width` to get the segmented,
-colour coded row instead of a single free input; an entry without an `ID` is
-filler the user cannot edit.
+and the function answering it to `docs/tools/index.js`:
+
+```js
+export const RUNNERS = {
+  "my-tool": (inputs) => [{ label: "Result", value: inputs.bits }],
+};
+```
+
+It shows up as a card on its own — nothing to change in the components. Give
+`inputs` several entries with a `width` to get the segmented, colour coded row
+instead of a single free input; an entry without an `id` is filler the user
+cannot edit. Throw from the function to put a message under the card.
 
 ## Test
 
 ```sh
-go test ./...
+npm test
 ```
+
+`test/golden.json` holds 434 recorded cases. This toolbox began as a Go program
+that computed its answers on the server, and the golden file is what that Go
+returned for every one of them — captured before it was removed, and matched
+byte for byte by the port that replaced it. It stays the spec. The Go itself is
+in the history, at `6c8b634`.
+
+## Hosting
+
+The site is served from `docs/` on `main` by GitHub Pages. There is nothing to
+build, so a push is a deploy.

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Turing Complete Toolbox</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <!-- Where the vendored modules live, so they and our own code can both
+       import "preact" by name instead of by path. -->
+  <script type="importmap">
+    {
+      "imports": {
+        "preact": "./lib/preact.mjs",
+        "preact/hooks": "./lib/hooks.mjs",
+        "htm": "./lib/htm.mjs"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Turing Complete Toolbox</h1>
+    <p class="sub">Small helpers for building computers from NAND gates.</p>
+  </header>
+  <main id="tools"></main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
