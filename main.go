@@ -22,7 +22,8 @@ import (
 var webFS embed.FS
 
 type runRequest struct {
-	Input string `json:"input"`
+	// Inputs holds each of the tool's input boxes, keyed by input ID.
+	Inputs map[string]string `json:"inputs"`
 }
 
 type runResponse struct {
@@ -41,6 +42,10 @@ func handleRun(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusNotFound, runResponse{Error: "unknown tool: " + id})
 		return
 	}
+	if tool.Run == nil {
+		writeJSON(w, http.StatusBadRequest, runResponse{Error: id + " is documentation, it has nothing to run"})
+		return
+	}
 
 	var req runRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -48,7 +53,7 @@ func handleRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fields, err := tool.Run(req.Input)
+	fields, err := tool.Run(req.Inputs)
 	if err != nil {
 		writeJSON(w, http.StatusOK, runResponse{Error: err.Error()})
 		return
