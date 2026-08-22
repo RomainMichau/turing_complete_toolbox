@@ -17,8 +17,12 @@ export function InputForm({ inputs, values, onChange }) {
   )}</div>`;
 }
 
+// "bits" is a word that may hold variables, "binary" is a run of bits and
+// nothing else — see byteSpans for why the two are told apart.
 function FreeInput({ spec, onInput }) {
-  if (spec.format === "bits") return html`<${BitInput} spec=${spec} onInput=${onInput} />`;
+  if (spec.format === "bits" || spec.format === "binary") {
+    return html`<${BitInput} spec=${spec} letters=${spec.format === "bits"} onInput=${onInput} />`;
+  }
   return html`<input type="text" spellcheck="false" autocomplete="off"
                      placeholder=${spec.placeholder || ""}
                      onInput=${(e) => onInput(e.currentTarget.value)} />`;
@@ -27,7 +31,7 @@ function FreeInput({ spec, onInput }) {
 // BitInput draws a layer of coloured spans on top of a transparent input, so
 // the native caret, selection and scrolling are kept. The input stays
 // uncontrolled: the caret is the browser's business, not the renderer's.
-function BitInput({ spec, onInput }) {
+function BitInput({ spec, letters, onInput }) {
   const [text, setText] = useState("");
   const input = useRef(null);
   const layer = useRef(null);
@@ -46,7 +50,7 @@ function BitInput({ spec, onInput }) {
   return html`<div class="bitfield">
     <input ref=${input} type="text" spellcheck="false" autocomplete="off"
            placeholder=${spec.placeholder || ""} onInput=${changed} onScroll=${sync} />
-    <div ref=${layer} class="bits-layer" aria-hidden="true">${byteSpans(text)}</div>
+    <div ref=${layer} class="bits-layer" aria-hidden="true">${byteSpans(text, false, letters)}</div>
   </div>`;
 }
 

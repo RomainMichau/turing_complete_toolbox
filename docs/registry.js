@@ -1,6 +1,6 @@
-// Generated from the Go registry (internal/tools) at migration time.
-// The tool descriptors are static data: this is the file the old
-// GET /api/tools endpoint used to serve, frozen into a module.
+// The tool descriptors: static data describing what each tool shows. This
+// started as the Go registry the old GET /api/tools endpoint served, dumped
+// out at migration time, and is maintained here by hand since.
 
 export const TOOLS = [
   {
@@ -11,7 +11,8 @@ export const TOOLS = [
     "inputs": [
       {
         "id": "value",
-        "placeholder": "1100 1101, 205, 0xCD…"
+        "placeholder": "1100 1101, 205, 0xCD…",
+        "format": "binary"
       },
       {
         "id": "base",

@@ -14,11 +14,15 @@ const ZERO_WIDTH_SPACE = "\u200B";
 // between the bytes: a long value then wraps on byte boundaries only, never
 // inside one. The overlay of an input must not do that, or the copy would stop
 // lining up with the text underneath.
-export function byteSpans(text, breakable = false) {
-  // Letters are welcome: a decoder pattern like 0000vvvv is still a word, and
-  // reads better with its bytes told apart. Anything else is not a bit string
-  // (yet), so show it plain and let the error line do the talking.
-  if (/[^01a-zA-Z]/.test(text)) return text;
+//
+// Whether a letter counts depends on what the box holds. A decoder pattern like
+// 0000vvvv is still a word and reads better with its bytes told apart, so
+// letters are welcome there. A number box is not so lucky: 0xCD is all letters
+// and digits too, and colouring it byte by byte would claim it was bits.
+export function byteSpans(text, breakable = false, letters = true) {
+  // Anything else is not a bit string (yet), so show it plain and let the error
+  // line do the talking.
+  if ((letters ? /[^01a-zA-Z]/ : /[^01]/).test(text)) return text;
 
   const out = [];
   for (let end = text.length, i = 0; end > 0; end -= 8, i++) {

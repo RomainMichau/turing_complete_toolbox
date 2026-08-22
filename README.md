@@ -33,9 +33,12 @@ Click any result value to copy it.
 The converter guesses how to read what you type: a `0x`, `0b` or `0o` prefix
 settles it, and a string of nothing but `0` and `1` is taken as bits. The **Read
 as** buttons override the guess, and the answer always says which reading it
-used. Separators (spaces, `_`, `|`) are ignored, negatives come out in two's
-complement, and the bit rows alternate colour byte by byte — wrapping only on a
-byte boundary, never inside one. Bits are taken at the width they were typed,
+used. Separators (spaces, `_`, `|`) are dropped as you type, negatives come out
+in two's complement, and the bit rows alternate colour byte by byte — wrapping
+only on a byte boundary, never inside one. The box itself colours the same way
+while what you typed is nothing but bits, so the bytes line up between what you
+wrote and what came back; a value that is not bits, `0xCD` or `205`, is left
+plain rather than carved into bytes it does not have. Bits are taken at the width they were typed,
 anything else at the narrowest whole number of bytes; a narrower value also gets
 spelled out over a full 32 bit word.
 
@@ -123,6 +126,12 @@ It shows up as a card on its own — nothing to change in the components. Give
 `inputs` several entries with a `width` to get the segmented, colour coded row
 instead of a single free input; an entry without an `id` is filler the user
 cannot edit. Throw from the function to put a message under the card.
+
+A `format` asks for byte colouring as the value is typed. `"binary"` colours a
+run of bits and leaves anything else plain — what a number box wants, since
+`0xCD` is letters and digits too and is not bits. `"bits"` also lets letters
+through, for a box holding a pattern whose variables stand in for bits. The same
+two names work on a result field.
 
 ## Test
 
