@@ -32,9 +32,33 @@ body {
   font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
 }
 
-header { max-width: 60rem; margin: 0 auto 2rem; }
+header {
+  max-width: 60rem;
+  margin: 0 auto 2rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
 h1 { margin: 0; font-size: 1.6rem; letter-spacing: .02em; }
 .sub { margin: .35rem 0 0; color: var(--muted); font-size: .9rem; }
+
+/* Where the toolbox comes from. Quiet enough to stay out of the way. */
+.repo {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .35rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: .85rem;
+  text-decoration: none;
+  transition: color .15s, border-color .15s;
+}
+.repo:hover, .repo:focus-visible { color: var(--accent); border-color: var(--accent); }
+.repo svg { width: 1rem; height: 1rem; fill: currentColor; }
 
 main {
   max-width: 60rem;
