@@ -2,6 +2,8 @@
 
 A small web toolbox with helpers for playing [Turing Complete](https://turingcomplete.game/).
 
+**→ [romainmichau.github.io/turing_complete_toolbox](https://romainmichau.github.io/turing_complete_toolbox/)**
+
 Everything runs in the browser: there is no backend, no build step and nothing to
 install. The site is the `docs/` folder exactly as it sits in the repository.
 
@@ -136,5 +138,6 @@ in the history, at `6c8b634`.
 
 ## Hosting
 
-The site is served from `docs/` on `main` by GitHub Pages. There is nothing to
+The site is served from `docs/` on `main` by GitHub Pages — Settings → Pages →
+"Deploy from a branch", branch `main`, folder `/docs`. There is nothing to
 build, so a push is a deploy.
