@@ -4,10 +4,16 @@
 
 import { useState } from "preact/hooks";
 
-const STORE_KEY = "tct.collapsed";
+// Every toolbox built on this framework is served as its own GitHub Pages
+// project site, but they all share one origin (romainmichau.github.io) —
+// and localStorage is scoped per origin, not per path. A fixed key here
+// would let one toolbox's fold state leak into another's wherever they
+// happen to reuse a tool id. Keying off the deployed path keeps each site's
+// state to itself without every consumer having to configure anything.
+const STORE_KEY = "isa.collapsed." + (typeof location !== "undefined" ? location.pathname.split("/")[1] || "" : "");
 
-// A stored entry is true when the fold is *closed*, which is the shape the
-// pre-Preact toolbox wrote — so folds saved back then still apply.
+// A stored entry is true when the fold is *closed*: the default is open, so
+// only the folds a reader actually shut need remembering.
 let folds = load();
 
 function load() {
@@ -26,8 +32,9 @@ function save() {
   }
 }
 
-// useFold gives a fold its open state and the toggle to flip it, remembering
-// the choice under key.
+// useFold gives a fold its open state, the toggle to flip it, and a way to
+// force it open from outside — a card another card sends something to should
+// open up to show it, even if the reader had folded it shut.
 export function useFold(key, closedByDefault) {
   const [open, setOpen] = useState(() => !(key in folds ? Boolean(folds[key]) : closedByDefault));
   const toggle = () => {
@@ -37,5 +44,10 @@ export function useFold(key, closedByDefault) {
       return !wasOpen;
     });
   };
-  return [open, toggle];
+  const show = () => {
+    folds[key] = false;
+    save();
+    setOpen(true);
+  };
+  return [open, toggle, show];
 }

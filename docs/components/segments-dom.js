@@ -8,6 +8,7 @@
 // widget owns its subtree and only reports the values back up.
 
 import { COLORS } from "./bits.js";
+import { on } from "../lib/bus.js";
 
 function text(tag, className, content) {
   const el = document.createElement(tag);
@@ -23,10 +24,19 @@ function text(tag, className, content) {
 export function mountSegments(host, tool, onValues) {
   const values = {}; // id -> bits, shared by every rebuild
   let layout = null;
+  let row = null;
+
+  // A variant is picked by what one field holds: `equals` for a single value,
+  // `oneOf` when several spellings ask for the same shape — the five RISC-V
+  // opcodes that are all read as an I-type, say.
+  const matches = (when) => {
+    const held = values[when.input];
+    return when.oneOf ? when.oneOf.includes(held) : held === when.equals;
+  };
 
   const wanted = () => {
     for (const variant of tool.variants || []) {
-      if (values[variant.when.input] === variant.when.equals) return variant.inputs;
+      if (matches(variant.when)) return variant.inputs;
     }
     return tool.inputs;
   };
@@ -38,16 +48,84 @@ export function mountSegments(host, tool, onValues) {
     onValues({ ...values });
   };
 
+  const rowHost = document.createElement("div");
+
   const build = (focus) => {
     layout = wanted();
-    const row = segmentRow(layout, values, changed);
-    host.replaceChildren(row.el);
+    row = segmentRow(layout, values, changed);
+    rowHost.replaceChildren(row.el);
     if (focus) row.restore(focus);
   };
 
+  host.replaceChildren();
+  // The picker is a shortcut into the same fields typing reaches: it only
+  // ever sets values and asks for a rebuild, same as a keystroke does.
+  if (tool.instructions) {
+    host.append(instructionPicker(tool.instructions, (inst) => {
+      const before = { ...values };
+      tool.applyInstruction(inst, values);
+      changed();
+      // Send the caret to the first field the instruction did not pin down,
+      // so filling in the operands can start right away. "Pinned down" is
+      // whatever applyInstruction actually touched — there is no fixed list
+      // of field names here, that would only hold for one instruction set.
+      const pinned = new Set(Object.keys(values).filter((id) => values[id] !== before[id]));
+      const next = layout.find((spec) => spec.id && !pinned.has(spec.id));
+      if (next) row.restore({ id: next.id, caret: 0 });
+    }));
+  }
+  host.append(rowHost);
+
   build(null);
   onValues({ ...values }); // all zeroes is already a valid word
-  return () => host.replaceChildren();
+
+  // Another card — the decoder, handing over a word it just read — can load
+  // values in wholesale, the same as typing or the instruction picker would.
+  const offLoad = on(`load:${tool.id}`, (loaded) => {
+    Object.assign(values, loaded);
+    changed();
+  });
+
+  return () => {
+    host.replaceChildren();
+    offLoad();
+  };
+}
+
+let pickerSeq = 0;
+
+// instructionPicker is a type-ahead over the instruction names: pick one and
+// its opcode (and funct3/funct7) land in the boxes below, in whatever shape
+// that instruction's format asks for.
+function instructionPicker(instructions, onPick) {
+  const id = `inst-picker-${pickerSeq++}`;
+  const wrap = document.createElement("label");
+  wrap.className = "inst-picker";
+
+  const list = document.createElement("datalist");
+  list.id = id;
+  instructions.forEach((inst) => {
+    const opt = document.createElement("option");
+    opt.value = inst.name;
+    list.append(opt);
+  });
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.spellcheck = false;
+  input.autocomplete = "off";
+  input.placeholder = "add, addi, lw, beq…";
+  input.setAttribute("list", id);
+
+  const byName = new Map(instructions.map((inst) => [inst.name, inst]));
+  input.addEventListener("change", () => {
+    const inst = byName.get(input.value.trim().toLowerCase());
+    input.value = "";
+    if (inst) onPick(inst);
+  });
+
+  wrap.append(text("span", "choice-label", "instruction"), input, list);
+  return wrap;
 }
 
 // activeSegment remembers where the caret is, to put it back after a rebuild.

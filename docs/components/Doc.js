@@ -48,6 +48,8 @@ function Section({ section }) {
     case "table":
       return section.compact ? html`<${CompactTable} section=${section} />`
                              : html`<${Table} section=${section} />`;
+    case "grid":
+      return html`<${Grid} section=${section} />`;
     default:
       return html`<p class="doc-note">${section.text}</p>`;
   }
@@ -72,4 +74,22 @@ function CompactTable({ section }) {
   const width = Math.max(7, longest * 0.52).toFixed(1);
   return html`<div class="doc-compact" style=${`column-width:${width}rem`}>${rows.map((row, i) => html`
     <p class="doc-entry" key=${i}><span class="doc-key" style=${row.color ? `color:${colorVar(row.color)}` : null}>${row.key}</span><span class="doc-value">${row.value}</span></p>`)}</div>`;
+}
+
+// Grid is a reference table with columns of its own: the instruction tables of
+// a RISC-V card are read column by column — mnemonic, format, opcode, funct3 —
+// and a two column key/value list cannot hold that. Each column carries the
+// colour its field wears in the encoder, so an opcode is the same red wherever
+// it is read.
+function Grid({ section }) {
+  const columns = section.columns || [];
+  const head = columns.map((column, i) => html`<th key=${i} class=${column.mono ? "mono" : null}>${column.label}</th>`);
+  const rows = (section.rows || []).map((row, i) => html`
+    <tr key=${i}>${columns.map((column, j) => html`
+      <td key=${j} class=${column.mono ? "mono" : null}
+          style=${column.color ? `color:${colorVar(column.color)}` : null}>${row[j]}</td>`)}
+    </tr>`);
+  return html`<div class="doc-grid-scroll">
+    <table class="doc-grid"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
 }
