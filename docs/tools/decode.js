@@ -4,15 +4,10 @@
 // fields it does pin down, and names the letters for the rest.
 
 import { cleanBits, parseDigits } from "./bits.js";
-import { WORD_BITS, opcodeName, describeSymphony, MODE_NAMES } from "./symphony.js";
-
-// The fields of a word, as slices of the 32 character pattern.
-const MODE_AT = 1;
-const IMM_AT = 3;
-const OP_AT = 4;
-const DEST_AT = 8;
-const ARG_A_AT = 12;
-const ARG_B_AT = 20; // 16 in IMM mode, where argument B takes the last two bytes
+import {
+  WORD_BITS, opcodeName, describeSymphony, MODE_NAMES,
+  MODE_AT, IMM_AT, OP_AT, DEST_AT, ARG_A_AT, ARG_B_AT,
+} from "./symphony.js";
 
 const UINT64_MAX = (1n << 64n) - 1n;
 const UINT32_MAX = (1n << 32n) - 1n;

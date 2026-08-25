@@ -2,48 +2,12 @@
 // started as the Go registry the old GET /api/tools endpoint served, dumped
 // out at migration time, and is maintained here by hand since.
 
+import { NUMBER_TOOL } from "./tools/number.js";
+import { sendableFromBits } from "./tools/bits.js";
+import { WORD_BITS, wordFields } from "./tools/symphony.js";
+
 export const TOOLS = [
-  {
-    "id": "number",
-    "name": "Number Converter",
-    "family": "General",
-    "description": "Binary, decimal, hex and octal, all at once. Prefixes and separators are understood, and negatives come out in two's complement.",
-    "inputs": [
-      {
-        "id": "value",
-        "placeholder": "1100 1101, 205, 0xCD…",
-        "format": "binary"
-      },
-      {
-        "id": "base",
-        "label": "Read as",
-        "kind": "choice",
-        "options": [
-          {
-            "id": "auto",
-            "label": "Auto"
-          },
-          {
-            "id": "bin",
-            "label": "Binary"
-          },
-          {
-            "id": "dec",
-            "label": "Decimal"
-          },
-          {
-            "id": "hex",
-            "label": "Hex"
-          },
-          {
-            "id": "oct",
-            "label": "Octal"
-          }
-        ],
-        "value": "auto"
-      }
-    ]
-  },
+  NUMBER_TOOL,
   {
     "id": "symphony-doc",
     "name": "Instruction Doc",
@@ -594,6 +558,9 @@ export const TOOLS = [
     "name": "Instruction Decoder",
     "family": "Symphony",
     "description": "Read a word back into its fields. Letters stand for variables, so a pattern like 0000vvvv aaaaaaaa works as well as plain bits.",
+    "sendTo": "symphony-instruction",
+    "sendLabel": "Edit in encoder →",
+    "extractSendable": (res) => sendableFromBits(res, WORD_BITS, wordFields),
     "inputs": [
       {
         "id": "word",

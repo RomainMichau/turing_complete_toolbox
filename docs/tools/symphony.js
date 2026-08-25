@@ -10,10 +10,36 @@
 //
 // where argument B is a 16 bit literal instead of an address.
 
+import { sliceFields } from "./bits.js";
+
 export const SHIFT = { mode: 29, imm: 28, op: 24, dest: 20, argA: 16, argB: 8 };
 export const ARG_B_WIDTH = 4;
 export const ARG_B_WIDTH_IMM = 16;
 export const WORD_BITS = 32;
+
+// The same fields, as slice offsets into the 32 character pattern (MSB
+// first) the decoder and the encoder's segmented boxes both read.
+export const MODE_AT = 1;
+export const IMM_AT = 3;
+export const OP_AT = 4;
+export const DEST_AT = 8;
+export const ARG_A_AT = 12;
+export const ARG_B_AT = 20; // 16 in IMM mode, where argument B takes the last two bytes
+
+// wordFields cuts a full 32 bit pattern — every bit known, none of it a
+// decoder's variable letter — into the named fields the encoder's boxes
+// hold, so a decoded word can be handed straight to the encoder to tweak.
+export function wordFields(pattern) {
+  const isIMM = pattern[IMM_AT] === "1";
+  return sliceFields(pattern, [
+    ["mode", [MODE_AT, MODE_AT + 2]],
+    ["imm", [IMM_AT, IMM_AT + 1]],
+    ["op", [OP_AT, OP_AT + 4]],
+    ["dest", [DEST_AT, DEST_AT + 4]],
+    ["argA", [ARG_A_AT, ARG_A_AT + 4]],
+    ["argB", isIMM ? [16, WORD_BITS] : [ARG_B_AT, ARG_B_AT + 4]],
+  ]);
+}
 
 // Modes, in the order of their encoding.
 export const MODE_IO = 0;
