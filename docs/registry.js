@@ -1,6 +1,4 @@
-// The tool descriptors: static data describing what each tool shows. This
-// started as the Go registry the old GET /api/tools endpoint served, dumped
-// out at migration time, and is maintained here by hand since.
+// The tool descriptors: static data describing what each tool shows.
 
 import { NUMBER_TOOL } from "./tools/number.js";
 import { sendableFromBits } from "./tools/bits.js";
