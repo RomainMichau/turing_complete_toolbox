@@ -10,21 +10,46 @@
 //
 // where argument B is a 16 bit literal instead of an address.
 
-import { sliceFields } from "./bits.js";
+import { sliceFields, shiftToSlice } from "./bits.js";
 
-export const SHIFT = { mode: 29, imm: 28, op: 24, dest: 20, argA: 16, argB: 8 };
-export const ARG_B_WIDTH = 4;
-export const ARG_B_WIDTH_IMM = 16;
 export const WORD_BITS = 32;
 
-// The same fields, as slice offsets into the 32 character pattern (MSB
-// first) the decoder and the encoder's segmented boxes both read.
-export const MODE_AT = 1;
-export const IMM_AT = 3;
-export const OP_AT = 4;
-export const DEST_AT = 8;
-export const ARG_A_AT = 12;
-export const ARG_B_AT = 20; // 16 in IMM mode, where argument B takes the last two bytes
+// Where each field sits in the word: how far left it is shifted from the
+// LSB, and how wide. Everything else here — the encoder's packing, the
+// decoder's slice offsets below — is derived from this one table, instead
+// of each hand-maintaining its own copy of the same layout.
+export const FIELDS = {
+  mode: { shift: 29, width: 2 },
+  imm: { shift: 28, width: 1 },
+  op: { shift: 24, width: 4 },
+  dest: { shift: 20, width: 4 },
+  argA: { shift: 16, width: 4 },
+  argB: { shift: 8, width: 4 },
+};
+// With the immediate flag set, argument B is a 16 bit literal over the low
+// two bytes instead.
+const ARG_B_IMM = { shift: 0, width: 16 };
+
+// layout is FIELDS in word order, argB swapped for its IMM-mode shape when
+// asked — what the encoder packs a word from.
+export function layout(imm) {
+  return [
+    ["mode", FIELDS.mode], ["imm", FIELDS.imm], ["op", FIELDS.op],
+    ["dest", FIELDS.dest], ["argA", FIELDS.argA],
+    ["argB", imm ? ARG_B_IMM : FIELDS.argB],
+  ];
+}
+
+// The same fields, as the start of their slice offset into the 32 character
+// pattern (MSB first) the decoder and the encoder's segmented boxes read —
+// each one's own width completes the range at its use site.
+const at = (id) => shiftToSlice(FIELDS[id].shift, FIELDS[id].width, WORD_BITS)[0];
+export const MODE_AT = at("mode");
+export const IMM_AT = at("imm");
+export const OP_AT = at("op");
+export const DEST_AT = at("dest");
+export const ARG_A_AT = at("argA");
+export const ARG_B_AT = at("argB"); // 16 in IMM mode, where argument B takes the last two bytes
 
 // wordFields cuts a full 32 bit pattern — every bit known, none of it a
 // decoder's variable letter — into the named fields the encoder's boxes
