@@ -579,6 +579,10 @@ export const TOOLS = [
           {
             "id": "number",
             "label": "Number"
+          },
+          {
+            "id": "hex",
+            "label": "Hex"
           }
         ],
         "value": "bits"

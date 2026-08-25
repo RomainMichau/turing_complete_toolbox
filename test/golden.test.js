@@ -2,6 +2,12 @@
 // ported from: every case is an input and the exact answer the Go gave for it.
 // It is the spec, and it is why the port could be trusted — the whole corpus
 // matched byte for byte on the day the Go was removed.
+//
+// A handful of symphony-decode cases with a 0x/0b/0o-prefixed word under
+// "Read as: Bits" were updated after that day: the decoder now shares its
+// word-parsing with riscv-toolbox's, which auto-detects that prefix
+// regardless of the Read-as toggle — a real behavior change, adopted
+// deliberately, not a Go-parity bug.
 
 import test from "node:test";
 import assert from "node:assert/strict";
