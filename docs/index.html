@@ -3,7 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Turing Complete Toolbox</title>
+  <title>Turing Complete Toolbox — Symphony Assembly Encoder &amp; Decoder</title>
+  <meta name="description" content="Free browser tool to encode and decode Symphony instructions for the game Turing Complete, plus a number converter and a full opcode and register reference.">
+  <link rel="canonical" href="https://romainmichau.github.io/turing_complete_toolbox/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Turing Complete Toolbox — Symphony Assembly Encoder &amp; Decoder">
+  <meta property="og:description" content="Free browser tool to encode and decode Symphony instructions for the game Turing Complete, plus a number converter and a full opcode and register reference.">
+  <meta property="og:url" content="https://romainmichau.github.io/turing_complete_toolbox/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Turing Complete Toolbox — Symphony Assembly Encoder &amp; Decoder">
+  <meta name="twitter:description" content="Free browser tool to encode and decode Symphony instructions for the game Turing Complete, plus a number converter and a full opcode and register reference.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Turing Complete Toolbox",
+    "url": "https://romainmichau.github.io/turing_complete_toolbox/",
+    "description": "Free browser tool to encode and decode Symphony instructions for the game Turing Complete, plus a number converter and a full opcode and register reference.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <!-- Where the vendored modules live, so they and our own code can both
@@ -22,7 +43,7 @@
   <header>
     <div>
       <h1>Turing Complete Toolbox</h1>
-      <p class="sub">Small helpers for building computers from NAND gates.</p>
+      <p class="sub">A Symphony instruction encoder and decoder for the game Turing Complete — opcodes, registers and the immediate mode — plus a number converter and a full architecture reference, all in the browser.</p>
     </div>
     <div class="links">
       <a class="repo" href="https://romainmichau.github.io/riscv-toolbox/">
@@ -38,6 +59,9 @@
       </a>
     </div>
   </header>
+  <nav class="reference-links" aria-label="Reference">
+    <a href="reference/">Instruction reference</a>
+  </nav>
   <main id="tools"></main>
   <script type="module" src="app.js"></script>
 </body>
