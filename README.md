@@ -7,7 +7,9 @@ converter, and the Symphony instruction set as reference, encoder and decoder.
 
 Static site — no backend, no build. It is `docs/`, served as it sits.
 
-Same shape as [RISC-V Toolbox](https://github.com/RomainMichau/riscv-toolbox), a sibling toolbox for RV32.
+Same shape as [RISC-V Toolbox](https://github.com/RomainMichau/riscv-toolbox) and
+[AArch64 Toolbox](https://github.com/RomainMichau/aarch64-toolbox), sibling
+toolboxes for other instruction sets.
 
 ```sh
 npm run serve   # localhost:8080
