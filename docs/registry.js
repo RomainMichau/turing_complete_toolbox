@@ -447,6 +447,14 @@ export const TOOLS = [
   },
   {
     "id": "symphony-instruction",
+    // The other half of the decoder's hand-off: a word built here can go
+    // straight back to be read field by field.
+    "sendTo": "symphony-decode",
+    "sendLabel": "Read in decoder →",
+    "extractSendable": (res) => {
+      const bits = res.fields?.find((f) => f.label === "Bits")?.value?.replace(/ /g, "");
+      return bits && new RegExp(`^[01]{${WORD_BITS}}$`).test(bits) ? { word: bits, read: "bits" } : null;
+    },
     "name": "Instruction Encoder",
     "family": "Symphony",
     "description": "Build an instruction bit by bit and read the integer to feed the machine. The doc above spells out the layout and every opcode.",
